@@ -5,6 +5,7 @@ use super::{
     region::{Frame, Window},
     Shared,
 };
+use defmt::Format;
 use lorawan_encoding::{
     self,
     keys::AES128,
@@ -73,7 +74,7 @@ impl NoSession {
         }
     }
 }
-
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[derive(Debug)]
 pub enum Error {
     DeviceDoesNotHaveOtaaCredentials,
