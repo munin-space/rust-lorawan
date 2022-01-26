@@ -7,20 +7,21 @@ pub mod session;
 
 pub use region::DR;
 
-pub struct Shared<'a, R: radio::PhyRxTx + Timings> {
+pub struct Shared<R: radio::PhyRxTx + Timings, const N: usize> {
     radio: R,
-    credentials: Credentials,
+    credentials: Option<Credentials>,
     region: region::Configuration,
     mac: Mac,
     // TODO: do something nicer for randomness
     get_random: fn() -> u32,
-    tx_buffer: RadioBuffer<'a>,
+    tx_buffer: RadioBuffer<N>,
     downlink: Option<Downlink>,
     datarate: DR,
 }
 
+#[allow(clippy::large_enum_variant)]
 enum Downlink {
-    Data(DecryptedDataPayload<Vec<u8, U256>>),
+    Data(DecryptedDataPayload<Vec<u8, 256>>),
     Join(JoinAccept),
 }
 
@@ -29,11 +30,11 @@ pub struct JoinAccept {
     pub cflist: Option<[u32; 5]>,
 }
 
-impl<'a, R: radio::PhyRxTx + Timings> Shared<'a, R> {
+impl<'a, R: radio::PhyRxTx + Timings, const N: usize> Shared<R, N> {
     pub fn get_mut_radio(&mut self) -> &mut R {
         &mut self.radio
     }
-    pub fn get_mut_credentials(&mut self) -> &mut Credentials {
+    pub fn get_mut_credentials(&mut self) -> &mut Option<Credentials> {
         &mut self.credentials
     }
     pub fn get_datarate(&mut self) -> DR {
@@ -43,7 +44,7 @@ impl<'a, R: radio::PhyRxTx + Timings> Shared<'a, R> {
         self.datarate = datarate;
     }
 
-    pub fn take_data_downlink(&mut self) -> Option<DecryptedDataPayload<Vec<u8, U256>>> {
+    pub fn take_data_downlink(&mut self) -> Option<DecryptedDataPayload<Vec<u8, 256>>> {
         if let Some(Downlink::Data(payload)) = self.downlink.take() {
             Some(payload)
         } else {
@@ -60,15 +61,14 @@ impl<'a, R: radio::PhyRxTx + Timings> Shared<'a, R> {
     }
 }
 
-impl<'a, R: radio::PhyRxTx + Timings> Shared<'a, R> {
+impl<R: radio::PhyRxTx + Timings, const N: usize> Shared<R, N> {
     pub fn new(
         radio: R,
-        credentials: Credentials,
+        credentials: Option<Credentials>,
         region: region::Configuration,
         mac: Mac,
         get_random: fn() -> u32,
-        buffer: &'a mut [u8],
-    ) -> Shared<R> {
+    ) -> Shared<R, N> {
         let datarate = region.get_default_datarate();
         Shared {
             radio,
@@ -76,13 +76,9 @@ impl<'a, R: radio::PhyRxTx + Timings> Shared<'a, R> {
             region,
             mac,
             get_random,
-            tx_buffer: RadioBuffer::new(buffer),
+            tx_buffer: RadioBuffer::new(),
             downlink: None,
             datarate,
         }
     }
-}
-
-trait CommonState<'a, R: radio::PhyRxTx + Timings> {
-    fn get_mut_shared(&mut self) -> &mut Shared<'a, R>;
 }

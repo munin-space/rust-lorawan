@@ -7,10 +7,12 @@ example in [the sx12xx-rs repository](https://github.com/lthiery/sx12xx-rs). You
 may also consider the example from
 [the Drogue Device framework](https://github.com/drogue-iot/drogue-device/).
 
-This is a very state machine driven implementation of a LoRaWAN stack designed
-for concurrency in non-threaded environments. The state machine implementation
-was based off
-[an article by Ana Hobden](https://hoverbear.org/blog/rust-state-machine-pattern/).
+The device stack supports two modes, both designed for concurrency in non-threaded environments:
+
+* A state machine implementation based off [an article by Ana Hobden](https://hoverbear.org/blog/rust-state-machine-pattern/).
+* An async-await implementation that can be used with async radio interfaces.
+
+## State machine implementation
 
 There are two super-states that the Device can be in:
 
@@ -22,8 +24,9 @@ A state machine diagram is provided in `src/state_machines/session`
 The following LoRaWAN features are implemented:
 
 - Class A device behavior
+- Over-the-Air Activation (OTAA) and Activation by Personalization (ABP)
 - Regional support for US915, EU868, and CN470
-- Supports CFList in JoinAccept
+- Supports CFList in JoinAccept for EU868 and CN470
 - the stack starts deriving a new session when the FCnt maxes out the 32-bit
   counter; new session may also be created by any time by the user, as long the
   stack is not mid-transmit
@@ -47,6 +50,21 @@ The following design features are implemented:
 This is a work in progress and the notable limitations are:
 
 - Class A behavior only, not B or C
-- OTAA only, no ABP
 - no retries on Joins or Confirmed packets and the user is instead given
   **NoAck** and **NoJoinAccept** responses
+
+## Async implementation
+
+The async implementation uses the async-await capabilities of Rust to drive the state machine. It
+differs from the state machine implementation in the following ways:
+
+* Join, send and send_recv are all async methods that can be awaited until the state transition is
+  complete.
+* When a session is expired, a SessionExpired error will be returned when attempting to send data. A
+  new call to join must be made to establish a new session.
+* The radio implementation is fully async
+* A trait for an asynchronous timer is defined and must be implemented to use the async stack
+* Uses the RngCore trait for random number generation
+
+In terms of features, the async stack supports the same set of features as the state machine driven
+implementation.
