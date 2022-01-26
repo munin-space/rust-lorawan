@@ -46,6 +46,7 @@ use super::super::no_session::{NoSession, SessionData};
 use super::super::State as SuperState;
 use super::super::*;
 use super::region::{Frame, Window};
+use defmt::Format;
 use generic_array::{typenum::U256, GenericArray};
 use lorawan_encoding::{
     self,
@@ -95,6 +96,7 @@ impl From<Session> for SuperState {
 
 into_state![Idle, SendingData, WaitingForRxWindow, WaitingForRx];
 
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[derive(Debug)]
 pub enum Error {
     RadioEventWhileIdle,
