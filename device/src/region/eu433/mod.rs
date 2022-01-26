@@ -46,12 +46,12 @@ impl RegionHandler for EU433 {
 
     fn get_data_frequency(&mut self, random: u8) -> u32 {
         if let Some(cf_list) = self.cf_list {
-            let channel = random as usize & 0b111;
+            let channel = random as usize & 0b011;
             self.last_tx = channel;
             if channel < JOIN_CHANNELS.len() {
                 JOIN_CHANNELS[channel]
             } else {
-                cf_list[channel - JOIN_CHANNELS.len()]
+                JOIN_CHANNELS[channel - JOIN_CHANNELS.len()]
             }
         } else {
             let channel = random as usize % JOIN_CHANNELS.len();
@@ -68,7 +68,7 @@ impl RegionHandler for EU433 {
                     if channel < JOIN_CHANNELS.len() {
                         JOIN_CHANNELS[channel]
                     } else {
-                        cf_list[channel - JOIN_CHANNELS.len()]
+                        JOIN_CHANNELS[channel - JOIN_CHANNELS.len()]
                     }
                 } else {
                     let channel = self.last_tx;
