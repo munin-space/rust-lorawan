@@ -26,15 +26,17 @@ impl RegionHandler for EU433 {
         &mut self,
         join_accept: &super::DecryptedJoinAcceptPayload<T, C>,
     ) -> JoinAccept {
-        let mut new_cf_list = [0, 0, 0, 0, 0];
         if let Some(cf_list) = join_accept.c_f_list() {
+            let mut new_cf_list = [0, 0, 0, 0, 0];
             for (index, freq) in cf_list.iter().enumerate() {
                 new_cf_list[index] = freq.value();
             }
-        }
-        self.cf_list = Some(new_cf_list);
-        JoinAccept {
-            cflist: Some(new_cf_list),
+            self.cf_list = Some(new_cf_list);
+            JoinAccept {
+                cflist: Some(new_cf_list),
+            }
+        } else {
+            JoinAccept { cflist: None }
         }
     }
 
@@ -46,12 +48,12 @@ impl RegionHandler for EU433 {
 
     fn get_data_frequency(&mut self, random: u8) -> u32 {
         if let Some(cf_list) = self.cf_list {
-            let channel = random as usize & 0b011;
+            let channel = random as usize & 0b111;
             self.last_tx = channel;
             if channel < JOIN_CHANNELS.len() {
                 JOIN_CHANNELS[channel]
             } else {
-                JOIN_CHANNELS[channel - JOIN_CHANNELS.len()]
+                cf_list[channel - JOIN_CHANNELS.len()]
             }
         } else {
             let channel = random as usize % JOIN_CHANNELS.len();
@@ -68,7 +70,7 @@ impl RegionHandler for EU433 {
                     if channel < JOIN_CHANNELS.len() {
                         JOIN_CHANNELS[channel]
                     } else {
-                        JOIN_CHANNELS[channel - JOIN_CHANNELS.len()]
+                        cf_list[channel - JOIN_CHANNELS.len()]
                     }
                 } else {
                     let channel = self.last_tx;
