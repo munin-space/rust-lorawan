@@ -157,10 +157,6 @@ impl Configuration {
 
     pub(crate) fn create_tx_config(&mut self, random: u8, datarate: DR, frame: &Frame) -> TxConfig {
         let datarate = self.get_tx_datarate(datarate, frame);
-        let frequency = match frame {
-            Frame::Data => self.get_data_frequency(random as u8),
-            Frame::Join => self.get_join_frequency(random as u8),
-        };
         TxConfig {
             pw: self.get_dbm(),
             rf: RfConfig {
