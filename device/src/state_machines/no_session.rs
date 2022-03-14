@@ -5,7 +5,6 @@ use super::{
     region::{Frame, Window},
     Shared,
 };
-use defmt::Format;
 use lorawan_encoding::{
     self,
     keys::AES128,

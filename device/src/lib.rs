@@ -42,6 +42,7 @@ where
 type FcntDown = u32;
 type FcntUp = u32;
 
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[derive(Debug)]
 pub enum Response {
     NoUpdate,
@@ -72,6 +73,7 @@ where
     }
 }
 
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum Event<'a, R>
 where
     R: radio::PhyRxTx,
@@ -97,6 +99,7 @@ where
     }
 }
 
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct SendData<'a> {
     data: &'a [u8],
     fport: u8,
