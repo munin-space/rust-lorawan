@@ -3,6 +3,7 @@ pub use types::*;
 
 use super::TimestampMs;
 
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[derive(Debug)]
 pub enum Event<'a, R>
 where
@@ -44,9 +45,20 @@ where
 use core::fmt;
 
 pub trait PhyRxTx {
+    #[cfg(not(feature = "defmt"))]
     type PhyEvent: fmt::Debug;
+    #[cfg(feature = "defmt")]
+    type PhyEvent: fmt::Debug + defmt::Format;
+
+    #[cfg(not(feature = "defmt"))]
     type PhyError: fmt::Debug;
+    #[cfg(feature = "defmt")]
+    type PhyError: fmt::Debug + defmt::Format;
+
+    #[cfg(not(feature = "defmt"))]
     type PhyResponse: fmt::Debug;
+    #[cfg(feature = "defmt")]
+    type PhyResponse: fmt::Debug + defmt::Format;
 
     fn get_mut_radio(&mut self) -> &mut Self;
 

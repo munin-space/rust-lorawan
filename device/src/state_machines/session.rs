@@ -46,7 +46,6 @@ use super::super::no_session::{NoSession, SessionData};
 use super::super::State as SuperState;
 use super::super::*;
 use super::region::{Frame, Window};
-use defmt::Format;
 use generic_array::{typenum::U256, GenericArray};
 use lorawan_encoding::{
     self,
