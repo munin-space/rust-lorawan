@@ -15,6 +15,7 @@ where
     PhyEvent(R::PhyEvent),
 }
 
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[derive(Debug)]
 pub enum Response<R>
 where
