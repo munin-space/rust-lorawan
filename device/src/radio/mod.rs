@@ -29,6 +29,7 @@ where
     PhyResponse(R::PhyResponse),
 }
 
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[derive(Debug)]
 pub enum Error<R>
 where
